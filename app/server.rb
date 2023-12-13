@@ -1,6 +1,7 @@
 require "socket"
 
-class YourRedisServer
+class RedisServer
+  MAX_REQUEST_LENGTH = 1024
   def initialize(port)
     @port = port
   end
@@ -9,9 +10,16 @@ class YourRedisServer
 
     server = TCPServer.new(@port)
     s = server.accept
-    s.puts "+PONG\r\n"
+
+    loop do
+      s.recv(MAX_REQUEST_LENGTH)
+      s.puts "+PONG\r\n"
+      rescue Errno::ECONNRESET
+        puts "The connection is terminated by the client."
+      break
+    end
     s.close
   end
 end
 
-YourRedisServer.new(6379).start
+RedisServer.new(6379).start
