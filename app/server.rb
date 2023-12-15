@@ -1,53 +1,70 @@
 # frozen_string_literal: true
 
 require 'socket'
+require 'singleton'
+
+class Storage
+  include Singleton
+
+  def initialize
+    @store = {}
+  end
+
+  def set_value(key, value)
+    @store[key] = value
+  end
+
+  def get_value(key)
+    @store[key]
+  end
+end
 
 class Parser
-  SKIPPED_STRING_DESCRIPTOR = ['$', '*'].freeze
+  SKIPPED_STRING_DESCRIPTOR = /[*$]\d+/
 
   def initialize(message)
     @message = message
     @response = ''
-    @last_processed_command = ''
   end
 
   def parse
     puts "Message to parse - #{@message}"
-    @message.split("\r\n").reject { |element| (element =~ /[*$]\d+/) }.each_with_index do |command, _index|
-      process_command(command)
-    end
+    commands = @message.split("\r\n").reject { |element| (element =~ SKIPPED_STRING_DESCRIPTOR) }
+    process_command(commands)
     puts "Response - #{@response}"
     @response
   end
 
-  def process_command(command)
-    puts "Command - #{command}"
-    command_type = command[0]
+  def process_command(commands)
+    puts "Command - #{commands}"
+    command_type = commands[0]
     puts "command type = #{command_type}"
 
-    case command.upcase
+    case command_type.upcase
     when 'PING'
-      process_ping(command.upcase)
-    end
-
-    case @last_processed_command
+      process_ping
     when 'ECHO'
-      process_simple_string(command)
+      process_simple_string(commands[1])
     when 'SET'
-      process_set(command)
+      puts "when set commands: #{commands}"
+      process_set({ key: commands[1], value: commands[2] })
+    when 'GET'
+      process_get(commands[1])
     end
-
-    @last_processed_command = command.upcase
   end
 
-  def process_set(_command)
-    key = all_commands[index]
-    value = all_commands[index + 2]
-    Storage.instance.set_value(key, value)
+  def process_set(command)
+    puts "process_set comman: #{command}"
+    Storage.instance.set_value(command[:key], command[:value])
     process_simple_string('OK')
   end
 
-  def process_ping(_command)
+  def process_get(key)
+    value = Storage.instance.get_value(key)
+    process_simple_string(value)
+  end
+
+  def process_ping
     process_simple_string('PONG')
   end
 
