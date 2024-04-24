@@ -9,12 +9,14 @@ require_relative './parser.rb'
 class RedisServer
   MAX_REQUEST_LENGTH = 1024
   def initialize(port)
+    puts 'initialize'
     @port = port
     @server = TCPServer.new(port)
     @clients = []
   end
-
+  
   def listen
+    puts 'listen'
     loop do
       fds_to_watch = [@server, *@clients]
       ready_to_read, = IO.select(fds_to_watch)
@@ -31,6 +33,7 @@ class RedisServer
   private
 
   def handle_client(client)
+    puts 'handling request'
     request = client.readpartial(MAX_REQUEST_LENGTH)
     command = Parser.new(request).parse
     response = process_command(command)
@@ -86,5 +89,3 @@ class RedisServer
     @response = "$-1\r\n"
   end  
 end
-
-RedisServer.new(6379).listen
