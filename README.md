@@ -1,34 +1,41 @@
 [![progress-banner](https://backend.codecrafters.io/progress/redis/2b314456-f040-4e80-a01a-33ac1bf1d441)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
 
-This is a starting point for Ruby solutions to the
+This is a Ruby solutions to the
 ["Build Your Own Redis" Challenge](https://codecrafters.io/challenges/redis).
 
-In this challenge, you'll build a toy Redis clone that's capable of handling
-basic commands like `PING`, `SET` and `GET`. Along the way we'll learn about
-event loops, the Redis protocol and more.
+It builds a toy redis implementation in Ruby.
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+I've added my own tests for fun.
 
-# Passing the first stage
+# Installation
 
-The entry point for your Redis implementation is in `app/server.rb`. Study and
-uncomment the relevant code, and push your changes to pass the first stage:
+See the tools versions in .mise.toml file. Use [mise](https://github.com/jdx/mise) or your favorite ruby version manager.
+
+# Running
+
+You can run the program using `ruby app/main.rb` or `./spawn_redis_server.sh` which just wraps that command.
+
+# Install dependencies
+
+For local development you can install the dependencies with `bundle`.
 
 ```sh
-git add .
-git commit -m "pass 1st stage" # any msg
-git push origin master
+# make sure you have bundle, other wise `gem install bundler`
+bundle install
 ```
 
-That's all!
+# Testing
 
-# Stage 2 & beyond
+You can install `redis` and use the `redis-cli` to interact with the program.
 
-Note: This section is for stages 2 and beyond.
+```sh
+ruby app/main.rb & # put the process in the background and note the PID
+redis-cli ping # send command to the program and see output
+# you call then `kill <PID>` to terminate the program
+```
 
-1. Ensure you have `ruby (2.7)` installed locally
-1. Run `./spawn_redis_server.sh` to run your Redis server, which is implemented
-   in `app/server.rb`.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+You can also run the tests with rspec:
+
+```sh
+rspec
+```
